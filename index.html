@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algorithm Analysis & C++ Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #7c6af7;
+    --accent2: #4fd1c5;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --correct: #22c55e;
+    --correct-bg: #052015;
+    --correct-border: #16a34a;
+    --wrong: #ef4444;
+    --wrong-bg: #1f0505;
+    --wrong-border: #dc2626;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #111118 0%, #1a1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-left h1 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+  }
+
+  .header-left p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-bar {
+    width: 180px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .score-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent2);
+    background: rgba(79,209,197,0.08);
+    border: 1px solid rgba(79,209,197,0.2);
+    padding: 4px 12px;
+    border-radius: 99px;
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 24px 0;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .section-divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent2);
+    background: rgba(79,209,197,0.08);
+    border: 1px solid rgba(79,209,197,0.2);
+    padding: 4px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .questions-container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px 20px;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 20px;
+    transition: border-color 0.3s;
+  }
+
+  .question-card:hover { border-color: rgba(124,106,247,0.3); }
+
+  .question-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .q-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.25);
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .q-text {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--surface);
+  }
+
+  .option:not(.answered):hover {
+    border-color: rgba(124,106,247,0.5);
+    background: rgba(124,106,247,0.06);
+    transform: translateX(4px);
+  }
+
+  .option.answered { cursor: default; }
+
+  .option.correct {
+    border-color: var(--correct-border) !important;
+    background: var(--correct-bg) !important;
+    animation: flash-correct 0.4s ease;
+  }
+
+  .option.wrong {
+    border-color: var(--wrong-border) !important;
+    background: var(--wrong-bg) !important;
+    animation: flash-wrong 0.4s ease;
+  }
+
+  .option.show-correct {
+    border-color: var(--correct-border) !important;
+    background: rgba(34,197,94,0.04) !important;
+  }
+
+  @keyframes flash-correct {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes flash-wrong {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+    100% { transform: translateX(0); }
+  }
+
+  .opt-letter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: all 0.2s;
+    background: var(--card);
+  }
+
+  .option:not(.answered):hover .opt-letter {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .option.correct .opt-letter {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: #fff;
+  }
+
+  .option.wrong .opt-letter {
+    background: var(--wrong);
+    border-color: var(--wrong);
+    color: #fff;
+  }
+
+  .option.show-correct .opt-letter {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: #fff;
+  }
+
+  .opt-text {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text);
+    padding-top: 3px;
+  }
+
+  .explanation {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .explanation.correct-exp {
+    background: rgba(34,197,94,0.07);
+    border: 1px solid rgba(34,197,94,0.2);
+    color: #86efac;
+  }
+
+  .explanation.wrong-exp {
+    background: rgba(239,68,68,0.07);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: #fca5a5;
+  }
+
+  .explanation.show { display: block; }
+
+  .exp-label {
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .results-panel {
+    display: none;
+    max-width: 820px;
+    margin: 40px auto;
+    padding: 0 24px 80px;
+  }
+
+  .results-panel.show { display: block; }
+
+  .results-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    text-align: center;
+  }
+
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) calc(var(--pct, 0) * 3.6deg), var(--border) 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+
+  .score-circle::before {
+    content: '';
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: var(--card);
+  }
+
+  .score-num {
+    position: relative;
+    z-index: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .results-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .results-sub {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 32px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+  }
+
+  .stat-val.green { color: var(--correct); }
+  .stat-val.red { color: var(--wrong); }
+  .stat-val.blue { color: var(--accent); }
+
+  .stat-lbl {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .restart-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .restart-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+  .bottom-pad { height: 60px; }
+
+  @media (max-width: 600px) {
+    .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .progress-bar { width: 140px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .results-card { padding: 28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Algorithm Analysis &amp; C++ Quiz</h1>
+    <p>CS201 — 40 Questions</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="score-badge" id="scoreBadge">0 / 40</div>
+  </div>
+</div>
+
+<div id="quizBody">
+  <div class="section-divider">
+    <hr><span class="section-tag">Part 1 · Algorithm Analysis &amp; Big-O</span><hr>
+  </div>
+  <div class="questions-container" id="qContainer1"></div>
+
+  <div class="section-divider">
+    <hr><span class="section-tag">Part 2 · C++ Revision</span><hr>
+  </div>
+  <div class="questions-container" id="qContainer2"></div>
+  <div class="bottom-pad"></div>
+</div>
+
+<div class="results-panel" id="resultsPanel">
+  <div class="results-card">
+    <div class="score-circle" id="scoreCircle">
+      <span class="score-num" id="finalScoreNum">0%</span>
+    </div>
+    <div class="results-title" id="resultsTitle">Quiz Complete!</div>
+    <div class="results-sub" id="resultsSub"></div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-val green" id="statCorrect">0</span>
+        <div class="stat-lbl">Correct</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val red" id="statWrong">0</span>
+        <div class="stat-lbl">Wrong</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val blue">40</span>
+        <div class="stat-lbl">Total</div>
+      </div>
+    </div>
+    <button class="restart-btn" onclick="restartQuiz()">&#8635; Restart Quiz</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What is the primary goal of algorithm analysis?",
+    opts: ["Measuring actual execution time in seconds","Determining time efficiency and memory consumption","Deciding which programming language is best for the solution","Checking the code for spelling errors"],
+    correct: 1,
+    explanations: ["Incorrect. Algorithm analysis is hardware-independent; actual seconds vary by machine.","Correct! Algorithm analysis focuses on evaluating time complexity and space (memory) usage to judge efficiency.","Incorrect. Algorithm analysis is language-agnostic.","Incorrect. That's the job of a linter or compiler, not algorithm analysis."]
+  },
+  {
+    q: "Big-O analysis primarily focuses on:",
+    opts: ["Calculating actual time in milliseconds","Scalability as data grows","Knowing the processor speed used for execution","Measuring OS background performance"],
+    correct: 1,
+    explanations: ["Incorrect. Big-O is machine-independent and doesn't measure real ms.","Correct! Big-O describes how an algorithm scales as the input size n grows toward infinity.","Incorrect. Big-O abstracts away hardware details.","Incorrect. OS performance is irrelevant to Big-O analysis."]
+  },
+  {
+    q: "When simplifying Big-O expressions, we:",
+    opts: ["Keep constants only and drop variables","Drop constants and lower-order terms","Multiply all arithmetic terms together","Focus only on the smallest term"],
+    correct: 1,
+    explanations: ["Incorrect. We do the opposite — constants are dropped.","Correct! In Big-O we drop constants (e.g. 3n → O(n)) and lower-order terms (e.g. n² + n → O(n²)).","Incorrect. We take the dominant term, not multiply all terms.","Incorrect. We focus on the largest (dominant) term, not the smallest."]
+  },
+  {
+    q: "What is the correct Big-O simplification of f(n) = n² + n?",
+    opts: ["O(n)","O(n³)","O(n²)","O(2n²)"],
+    correct: 2,
+    explanations: ["Incorrect. n is a lower-order term and is dropped.","Incorrect. There is no cubic term here.","Correct! n² dominates n for large values, so we drop n and keep O(n²).","Incorrect. The constant 2 is dropped in Big-O notation."]
+  },
+  {
+    q: "What is the correct Big-O simplification of f(n) = n + 2ⁿ?",
+    opts: ["O(n)","O(2ⁿ)","O(n · 2ⁿ)","O(1)"],
+    correct: 1,
+    explanations: ["Incorrect. 2ⁿ grows far faster than n.","Correct! Exponential 2ⁿ completely dominates the linear n term, so O(2ⁿ).","Incorrect. We don't multiply terms; we pick the dominant one.","Incorrect. O(1) means constant time — this function clearly grows."]
+  },
+  {
+    q: "For very large data, which statement is geometrically correct?",
+    opts: ["O(n²) will always be better","O(n log n) will completely outperform O(n²)","Both algorithms will work with the same efficiency","The advantage depends only on the compiler type"],
+    correct: 1,
+    explanations: ["Incorrect. O(n²) is worse than O(n log n) for large inputs.","Correct! As n → ∞, n log n grows much slower than n², so O(n log n) is clearly superior.","Incorrect. Their growth rates are fundamentally different.","Incorrect. The compiler doesn't change asymptotic complexity."]
+  },
+  {
+    q: "The Best Case analysis represents:",
+    opts: ["Maximum time taken for all inputs","The minimum number of steps possible to execute the solution","Average time after running the code many times","Time taken when memory is full"],
+    correct: 1,
+    explanations: ["Incorrect. That describes the Worst Case.","Correct! Best Case (Ω lower bound) is the minimum steps needed under the most favorable input.","Incorrect. That describes Average Case analysis.","Incorrect. Memory state is unrelated to best-case time complexity."]
+  },
+  {
+    q: "Why is Worst Case analysis the primary analysis for programmers?",
+    opts: ["Because it reserves less memory space","Because it gives a strict guarantee for maximum time","Because it simplifies writing program code","Because it ignores growth in large input sizes"],
+    correct: 1,
+    explanations: ["Incorrect. Worst Case is about time guarantees, not memory.","Correct! Worst Case gives an upper bound guarantee — the algorithm will NEVER exceed this time, making it the most useful for reliability.","Incorrect. It doesn't simplify coding.","Incorrect. Worst Case specifically accounts for large input growth."]
+  },
+  {
+    q: "Average Case analysis depends on:",
+    opts: ["Computing the average of first and last array elements","Assuming a specific probability distribution over all inputs","Running the algorithm on sorted data only","Measuring time for deletion operations"],
+    correct: 1,
+    explanations: ["Incorrect. It's about input distribution, not array values.","Correct! Average Case requires defining a probability distribution over all possible inputs, then computing the expected cost.","Incorrect. Sorted data is just one specific case.","Incorrect. Average Case applies to any operation, not just deletion."]
+  },
+  {
+    q: "What is Amortized Analysis?",
+    opts: ["Computing total RAM space consumed","The average cost of an operation over a sequence of operations","Time taken to run code in the background","Measuring code interface response speed"],
+    correct: 1,
+    explanations: ["Incorrect. Amortized analysis is about time cost, not memory.","Correct! Amortized analysis averages the total cost of a series of operations, so occasional expensive operations don't skew the per-operation cost (e.g., dynamic array resize).","Incorrect. Background execution is unrelated.","Incorrect. UI response speed is not amortized analysis."]
+  },
+  {
+    q: "In the mathematical definition of Big-O, the correct condition for all n ≥ n₀ is:",
+    opts: ["T(n) ≥ c · f(n)","T(n) ≤ c · f(n)","T(n) = c · f(n)","T(n) < f(n)"],
+    correct: 1,
+    explanations: ["Incorrect. That defines Omega (Ω), the lower bound.","Correct! Big-O: T(n) ≤ c·f(n) for all n ≥ n₀. It's an upper bound — the function doesn't grow faster than c·f(n).","Incorrect. Equality describes Theta (Θ), the tight bound.","Incorrect. This is Little-o (strict upper bound without equality)."]
+  },
+  {
+    q: "The asymptotic notation used to express the Lower Bound is:",
+    opts: ["Big-O (O)","Theta (Θ)","Omega (Ω)","Little-o (o)"],
+    correct: 2,
+    explanations: ["Incorrect. Big-O is the upper bound.","Incorrect. Theta is the tight bound (both upper and lower).","Correct! Omega (Ω) represents the lower bound — the algorithm takes at least this long.","Incorrect. Little-o is a strict upper bound."]
+  },
+  {
+    q: "When do we use Theta (Θ) notation to express performance?",
+    opts: ["When the algorithm always runs in constant time","When Big-O and Omega bounds match exactly","When the best case equals zero","When input size is below a certain threshold"],
+    correct: 1,
+    explanations: ["Incorrect. Constant time is O(1), not necessarily Θ context.","Correct! Θ is used when the upper (O) and lower (Ω) bounds are the same function — giving a tight asymptotic bound.","Incorrect. Best case equaling zero isn't relevant to Θ.","Incorrect. Θ applies regardless of input size thresholds."]
+  },
+  {
+    q: "What is the fundamental difference between Big-O (O) and Little-o (o)?",
+    opts: ["Big-O is for time and Little-o is for space","Little-o represents a strict upper bound without equality","Big-O is for loops and Little-o is for functions","There is no mathematical or programming difference between them"],
+    correct: 1,
+    explanations: ["Incorrect. Both can apply to either time or space.","Correct! Big-O allows T(n) ≤ c·f(n) (≤, can be equal), while Little-o requires T(n) < c·f(n) for ALL c > 0 (strictly less, cannot be equal).","Incorrect. Both apply to any algorithm analysis.","Incorrect. They have a precise mathematical distinction."]
+  },
+  {
+    q: "The notation that represents 'strictly greater' growth (little-omega) is:",
+    opts: ["Θ","ω (Little-omega)","Ω","o"],
+    correct: 1,
+    explanations: ["Incorrect. Θ is the tight bound.","Correct! Little-omega (ω) means T(n) grows strictly faster than f(n) for all constants — the strict version of Ω.","Incorrect. Big-Omega (Ω) is a non-strict lower bound.","Incorrect. Little-o is a strict upper bound."]
+  },
+  {
+    q: "The common name for the asymptotic complexity O(log n) is:",
+    opts: ["Linear","Logarithmic","Constant","Quadratic"],
+    correct: 1,
+    explanations: ["Incorrect. Linear is O(n).","Correct! O(log n) is called Logarithmic — typical of binary search and balanced BST operations.","Incorrect. Constant is O(1).","Incorrect. Quadratic is O(n²)."]
+  },
+  {
+    q: "An algorithm that runs in O(n log n) time is called:",
+    opts: ["Quadratic","Log-linear","Logarithmic","Exponential"],
+    correct: 1,
+    explanations: ["Incorrect. Quadratic is O(n²).","Correct! O(n log n) is called Log-linear or Linearithmic — typical of efficient sorting algorithms like Merge Sort.","Incorrect. Logarithmic is O(log n).","Incorrect. Exponential is O(cⁿ)."]
+  },
+  {
+    q: "Which option correctly orders time complexities from best (most efficient) to worst?",
+    opts: ["O(1) < O(n) < O(log n) < O(n²)","O(1) < O(log n) < O(n) < O(n log n) < O(n²)","O(n²) < O(n log n) < O(n) < O(1)","O(log n) < O(1) < O(n) < O(cⁿ)"],
+    correct: 1,
+    explanations: ["Incorrect. O(log n) is more efficient than O(n), so the order is wrong.","Correct! From most to least efficient: O(1) → O(log n) → O(n) → O(n log n) → O(n²) → O(cⁿ).","Incorrect. The order is reversed here.","Incorrect. O(1) is more efficient than O(log n)."]
+  },
+  {
+    q: "The common name for the complexity O(cⁿ) is:",
+    opts: ["Cubic","Quadratic","Exponential","Constant"],
+    correct: 2,
+    explanations: ["Incorrect. Cubic is O(n³).","Incorrect. Quadratic is O(n²).","Correct! O(cⁿ) is Exponential — it grows extremely fast and is generally impractical for large inputs.","Incorrect. Constant is O(1)."]
+  },
+  {
+    q: "The common name for the complexity O(n²) is:",
+    opts: ["Quadratic","Cubic","Linear","Log-linear"],
+    correct: 0,
+    explanations: ["Correct! O(n²) is called Quadratic — typical of nested loops like Bubble Sort.","Incorrect. Cubic is O(n³).","Incorrect. Linear is O(n).","Incorrect. Log-linear is O(n log n)."]
+  },
+  {
+    q: "What is the difference between C++ and C# in terms of Compilation Unit?",
+    opts: ["In C++ it is the Class, in C# it is the File","In C++ it is the File, in C# it is the Class","Both languages use Class as the basic unit","There is no compilation unit in C++ at all"],
+    correct: 1,
+    explanations: ["Incorrect. It's the other way around.","Correct! In C++ the compilation unit is the .cpp file (translated to an object file), while in C# the compilation unit is the class.","Incorrect. C++ is file-based, not class-based.","Incorrect. C++ absolutely has compilation units (.cpp files)."]
+  },
+  {
+    q: "For the compiler to produce an executable file in C++, it requires a function called:",
+    opts: ["void Program()","int main()","#ifndef()","std::cout()"],
+    correct: 1,
+    explanations: ["Incorrect. void Program() is not a standard C++ entry point.","Correct! Every C++ executable must have int main() — it's the mandatory entry point defined by the standard.","Incorrect. #ifndef is a preprocessor directive, not a function.","Incorrect. std::cout is an output stream object, not an entry point."]
+  },
+  {
+    q: "Any line starting with # in C++ is processed by:",
+    opts: ["The compiler to convert it directly to binary","The preprocessor for textual substitution","The Linker to connect external files","The Garbage Collector to clean RAM"],
+    correct: 1,
+    explanations: ["Incorrect. The compiler receives output after preprocessing.","Correct! The preprocessor handles all # directives (like #include, #define) by performing textual substitution BEFORE compilation.","Incorrect. The Linker connects object files, not preprocessor directives.","Incorrect. C++ has no Garbage Collector, and # directives aren't memory operations."]
+  },
+  {
+    q: "What is the difference between using <iostream> and using \"MyFile.h\"?",
+    opts: ["The first is for large files and the second for small ones","The first searches in the standard library path, the second searches locally","The first allocates on the Heap, the second on the Stack","There is no real difference in search behavior between them"],
+    correct: 1,
+    explanations: ["Incorrect. File size is not the distinction.","Correct! <iostream> (angle brackets) searches the system/standard include paths. \"MyFile.h\" (quotes) first searches the current directory, then standard paths.","Incorrect. #include has nothing to do with heap or stack allocation.","Incorrect. The search behavior is fundamentally different."]
+  },
+  {
+    q: "The main benefit of Header Guards is:",
+    opts: ["Encrypting header files completely","Preventing duplicate inclusion and avoiding compilation errors","Speeding up data printing to screen","Automatically converting private classes to public"],
+    correct: 1,
+    explanations: ["Incorrect. Header guards don't encrypt files.","Correct! Header guards (#ifndef / #define / #endif) prevent a header from being included multiple times, avoiding duplicate definition errors.","Incorrect. Header guards don't affect output speed.","Incorrect. They have nothing to do with access modifiers."]
+  },
+  {
+    q: "The correct keywords for building Header Guards are:",
+    opts: ["#if, #else, #endif","#ifndef, #define, #endif","#try, #catch, #finally","#include, #namespace, #main"],
+    correct: 1,
+    explanations: ["Incorrect. #if/#else/#endif is for conditional compilation, not header guards.","Correct! The standard pattern is: #ifndef HEADER_H / #define HEADER_H / ... content ... / #endif","Incorrect. #try/#catch/#finally don't exist in C++ preprocessor.","Incorrect. #namespace and #main are not valid preprocessor directives."]
+  },
+  {
+    q: "Namespaces are primarily used to:",
+    opts: ["Increase available memory for the program","Organize similar names and prevent conflicts","Allow direct access to private members","Speed up dynamic function calls in RAM"],
+    correct: 1,
+    explanations: ["Incorrect. Namespaces don't affect memory.","Correct! Namespaces group related identifiers and prevent name collisions between different libraries or code modules.","Incorrect. Namespaces don't affect access control.","Incorrect. Namespaces are a compile-time organizational tool."]
+  },
+  {
+    q: "The default namespace for the C++ standard library is:",
+    opts: ["system","std","main","io"],
+    correct: 1,
+    explanations: ["Incorrect. 'system' is not a C++ namespace.","Correct! All standard library components (cout, cin, vector, etc.) reside in the 'std' namespace.","Incorrect. 'main' is a function name, not a namespace.","Incorrect. 'io' is not a C++ namespace."]
+  },
+  {
+    q: "What programming feature is applied to the << operator with the cout object?",
+    opts: ["Multiple Inheritance","Operator Overloading","Strict Encapsulation","Automatic Destruction"],
+    correct: 1,
+    explanations: ["Incorrect. Multiple Inheritance is about class hierarchy.","Correct! The << operator is overloaded for the ostream class (which cout is an instance of) to support output of different data types.","Incorrect. Encapsulation is about data hiding, not operator behavior.","Incorrect. Automatic destruction (RAII) is unrelated to << behavior."]
+  },
+  {
+    q: "What allows chaining multiple outputs together like: cout << x << y?",
+    opts: ["The compiler ignoring whitespace entirely","The operator returning the cout object itself","Variables stored sequentially in the Stack","The main() function enforcing automatic chaining"],
+    correct: 1,
+    explanations: ["Incorrect. Whitespace handling is unrelated to chaining.","Correct! The overloaded << returns a reference to the same ostream object (cout), enabling method chaining: (cout << x) returns cout, then cout << y works.","Incorrect. Stack layout doesn't affect operator chaining.","Incorrect. main() has no special role in operator chaining."]
+  },
+  {
+    q: "The three basic components of a class in UML diagrams are:",
+    opts: ["File name, memory size, programming language","Name, member variables (attributes), and functions (methods)","Preprocessor, pointers, and Garbage Collector","Address, new operator, and delete operator"],
+    correct: 1,
+    explanations: ["Incorrect. These are not UML class components.","Correct! A UML class diagram has 3 compartments: (1) Class name, (2) Attributes/fields, (3) Methods/operations.","Incorrect. These are low-level C++ concepts, not UML components.","Incorrect. Memory operators are not UML diagram components."]
+  },
+  {
+    q: "The symbols used for public and private in UML diagrams are:",
+    opts: ["* and & respectively","+ and - respectively","# and @ respectively","The keywords are written as text with no symbols"],
+    correct: 1,
+    explanations: ["Incorrect. * and & are C++ pointer/reference operators.","Correct! In UML: + = public, - = private, # = protected, ~ = package.","Incorrect. # is used for protected, not private.","Incorrect. UML uses standard symbols, not keyword text."]
+  },
+  {
+    q: "C++ determines member visibility (access) inside a class by:",
+    opts: ["Writing the modifier before each variable or function","Using structural blocks like public:","Making all elements public by default","Separating modifiers in a separate external file"],
+    correct: 1,
+    explanations: ["Incorrect. That's Java's approach (writing public/private before each member).","Correct! C++ uses access specifier sections: 'public:', 'private:', 'protected:' — all members following that label inherit its access level.","Incorrect. C++ struct defaults to public, but class defaults to private.","Incorrect. Access specifiers are written directly in the class definition."]
+  },
+  {
+    q: "What does the 'friend' keyword grant to another class when declared?",
+    opts: ["The right to inherit all public functions of the class","Permission to access and modify private members","Preventing the other class from allocating on the Heap","Automatically destroying the other class on close"],
+    correct: 1,
+    explanations: ["Incorrect. friend doesn't grant inheritance — it bypasses encapsulation.","Correct! A friend class or function gains access to ALL private and protected members of the class that declared the friendship.","Incorrect. friend has nothing to do with memory allocation.","Incorrect. friend doesn't affect object lifetime."]
+  },
+  {
+    q: "The precise functional difference between Accessors and Mutators is:",
+    opts: ["Accessors modify, Mutators read","Accessors read, Mutators modify","Accessors allocate memory, Mutators free it","There is no functional difference between them"],
+    correct: 1,
+    explanations: ["Incorrect. This is reversed.","Correct! Accessors (getters) read/return data without modifying the object. Mutators (setters) modify the object's state.","Incorrect. Neither is responsible for memory management.","Incorrect. They serve opposite and distinct purposes."]
+  },
+  {
+    q: "To prevent an Accessor function from accidentally modifying object data, we write at the end:",
+    opts: ["static","const","void","template"],
+    correct: 1,
+    explanations: ["Incorrect. 'static' makes the function class-level, not read-only.","Correct! Declaring a member function 'const' (e.g., int getX() const) tells the compiler the function cannot modify any member variables.","Incorrect. 'void' is just the return type — it doesn't prevent modification.","Incorrect. 'template' is for generic programming, not const-correctness."]
+  },
+  {
+    q: "The primary benefit of using Templates is:",
+    opts: ["Speeding up program compilation time","Building generic functions and classes that accept any data type","Preventing memory leaks in random access memory","Forcing the program to work with pointers"],
+    correct: 1,
+    explanations: ["Incorrect. Templates actually increase compile time due to instantiation.","Correct! Templates enable generic programming — write once, use for int, double, string, or any type without code duplication.","Incorrect. Templates don't directly address memory leaks.","Incorrect. Templates work with any type, not just pointers."]
+  },
+  {
+    q: "When using 'template &lt;typename Type&gt;', the compiler:",
+    opts: ["Cancels the function if type int is not used","Substitutes the actual called type at compile time","Converts the variable to a constant pointer in memory","Calls the main function twice in sequence"],
+    correct: 1,
+    explanations: ["Incorrect. Templates work with any type, not just int.","Correct! The compiler performs template instantiation — it generates a concrete version of the function/class with the actual type substituted at the call site.","Incorrect. Template substitution doesn't create pointers.","Incorrect. main() is not called twice due to templates."]
+  },
+  {
+    q: "A Pointer is a variable whose primary function is to store:",
+    opts: ["The final numeric value of the variable directly","A number representing a memory location (address)","The variable name as a clear text string","The binary executable code of the main function"],
+    correct: 1,
+    explanations: ["Incorrect. That describes a regular variable.","Correct! A pointer stores a memory address — the location in RAM where the actual data resides. Dereferencing it (*ptr) accesses that data.","Incorrect. Variable names don't exist at runtime.","Incorrect. Function pointers exist, but that's not the primary description."]
+  },
+  {
+    q: "Which statement is completely correct about dynamic memory management in standard C++?",
+    opts: ["It is allocated with 'new' and freed automatically","It is allocated with 'new' and must be freed with 'delete'","It is allocated with 'delete' and freed with 'new'"],
+    correct: 1,
+    explanations: ["Incorrect. C++ does NOT have automatic garbage collection for heap memory — you must manually free it.","Correct! Dynamic memory in C++ is heap-allocated with 'new' and MUST be explicitly released with 'delete' (or 'delete[]' for arrays) to avoid memory leaks.","Incorrect. This is completely reversed — 'delete' frees memory, 'new' allocates it."]
+  }
+];
+
+let answered = 0;
+let correctCount = 0;
+const totalQ = questions.length;
+
+function renderQuestion(q, index, container) {
+  const letters = ['A','B','C','D'];
+  const card = document.createElement('div');
+  card.className = 'question-card';
+
+  const qTop = document.createElement('div');
+  qTop.className = 'question-top';
+
+  const num = document.createElement('span');
+  num.className = 'q-number';
+  num.textContent = 'Q' + (index + 1);
+
+  const text = document.createElement('div');
+  text.className = 'q-text';
+  text.innerHTML = q.q;
+
+  qTop.appendChild(num);
+  qTop.appendChild(text);
+  card.appendChild(qTop);
+
+  const opts = document.createElement('div');
+  opts.className = 'options';
+
+  q.opts.forEach((opt, oi) => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.id = 'opt-' + index + '-' + oi;
+
+    const letter = document.createElement('span');
+    letter.className = 'opt-letter';
+    letter.textContent = letters[oi];
+
+    const optText = document.createElement('span');
+    optText.className = 'opt-text';
+    optText.innerHTML = opt;
+
+    btn.appendChild(letter);
+    btn.appendChild(optText);
+    opts.appendChild(btn);
+
+    btn.addEventListener('click', () => handleAnswer(index, oi, q));
+  });
+
+  card.appendChild(opts);
+
+  const exp = document.createElement('div');
+  exp.className = 'explanation';
+  exp.id = 'exp-' + index;
+  card.appendChild(exp);
+
+  container.appendChild(card);
+}
+
+function handleAnswer(qIdx, chosenIdx, q) {
+  if (document.getElementById('opt-' + qIdx + '-0').classList.contains('answered')) return;
+
+  const isCorrect = chosenIdx === q.correct;
+  if (isCorrect) correctCount++;
+  answered++;
+
+  q.opts.forEach((_, oi) => {
+    const btn = document.getElementById('opt-' + qIdx + '-' + oi);
+    btn.classList.add('answered');
+    if (oi === q.correct && chosenIdx !== q.correct) {
+      btn.classList.add('show-correct');
+    }
+  });
+
+  const chosen = document.getElementById('opt-' + qIdx + '-' + chosenIdx);
+  chosen.classList.add(isCorrect ? 'correct' : 'wrong');
+
+  const exp = document.getElementById('exp-' + qIdx);
+  exp.classList.add(isCorrect ? 'correct-exp' : 'wrong-exp', 'show');
+
+  const label = document.createElement('div');
+  label.className = 'exp-label';
+  label.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+
+  const expText = document.createElement('div');
+  expText.innerHTML = q.explanations[chosenIdx];
+
+  exp.appendChild(label);
+  exp.appendChild(expText);
+
+  if (!isCorrect) {
+    const correctNote = document.createElement('div');
+    correctNote.style.marginTop = '8px';
+    correctNote.style.color = '#86efac';
+    correctNote.innerHTML = '<strong>Correct answer:</strong> ' + q.explanations[q.correct];
+    exp.appendChild(correctNote);
+  }
+
+  updateProgress();
+  if (answered === totalQ) setTimeout(showResults, 800);
+}
+
+function updateProgress() {
+  const pct = Math.round((answered / totalQ) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('scoreBadge').textContent = correctCount + ' / ' + totalQ;
+}
+
+function showResults() {
+  document.getElementById('quizBody').style.display = 'none';
+  const panel = document.getElementById('resultsPanel');
+  panel.classList.add('show');
+
+  const pct = Math.round((correctCount / totalQ) * 100);
+  document.getElementById('scoreCircle').style.setProperty('--pct', pct);
+  document.getElementById('finalScoreNum').textContent = pct + '%';
+  document.getElementById('statCorrect').textContent = correctCount;
+  document.getElementById('statWrong').textContent = totalQ - correctCount;
+
+  let title, sub;
+  if (pct >= 90) { title = '🏆 Excellent!'; sub = 'Outstanding performance!'; }
+  else if (pct >= 75) { title = '🎯 Great Job!'; sub = 'You have a solid grasp of the material.'; }
+  else if (pct >= 60) { title = '👍 Good Effort!'; sub = 'Review the topics you missed and try again.'; }
+  else { title = '📚 Keep Studying!'; sub = 'Go back and review the material carefully.'; }
+
+  document.getElementById('resultsTitle').textContent = title;
+  document.getElementById('resultsSub').textContent = sub + ' — Score: ' + correctCount + '/' + totalQ;
+}
+
+function restartQuiz() {
+  answered = 0;
+  correctCount = 0;
+  document.getElementById('quizBody').style.display = 'block';
+  document.getElementById('resultsPanel').classList.remove('show');
+  document.getElementById('qContainer1').innerHTML = '';
+  document.getElementById('qContainer2').innerHTML = '';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('scoreBadge').textContent = '0 / 40';
+  initQuiz();
+}
+
+function initQuiz() {
+  const c1 = document.getElementById('qContainer1');
+  const c2 = document.getElementById('qContainer2');
+  questions.forEach((q, i) => renderQuestion(q, i, i < 20 ? c1 : c2));
+}
+
+initQuiz();
+</script>
+</body>
+</html>
